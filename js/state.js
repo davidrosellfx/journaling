@@ -1,7 +1,6 @@
 import { storage } from './storage.js';
 import { uuid } from './utils/uuid.js';
 import { parseTime, durationMinutes } from './utils/date-helpers.js';
-import { SHEET_CONVERSION_FACTOR } from './utils/constants.js';
 
 const SENS_VALID = new Set([
   'Seguro - Confiado',
@@ -102,34 +101,6 @@ export const state = {
     const removed = before - this.trades.length;
     this.save();
     return removed;
-  },
-  // Repair trades where pnl_pct is suspect.
-  // Case A — paste-from-Excel column bug: pnl_pct stored as € amount (|pct| > 50).
-  //   Fix: divide by SHEET_CONVERSION_FACTOR/100 = 500.
-  // Case B — apps-script imported with wrong capital: pnl_pct stored at scale of
-  //   (€/oldCapital × 100). Real % = stored × oldCapital / SHEET_CONVERSION_FACTOR.
-  //   Caller passes oldCapital; only trades with affected sheets are touched.
-  repairAnomalousPct({ oldCapital = null, sheets = null } = {}) {
-    let fixed = 0;
-    for (const t of this.trades) {
-      if (sheets && !sheets.includes(t.sheet)) continue;
-      const pct = t.pnl_pct || 0;
-      let corrected = null;
-      if (Math.abs(pct) > 50) {
-        // Case A
-        corrected = (pct / SHEET_CONVERSION_FACTOR) * 100;
-      } else if (oldCapital && oldCapital > 0 && oldCapital !== SHEET_CONVERSION_FACTOR) {
-        // Case B — only when user explicitly provided the old capital
-        corrected = pct * (oldCapital / SHEET_CONVERSION_FACTOR);
-      }
-      if (corrected != null) {
-        t.pnl_pct = +corrected.toFixed(4);
-        t.result = t.pnl_pct > 0.2 ? 'TP' : t.pnl_pct < -0.2 ? 'SL' : 'BE';
-        fixed++;
-      }
-    }
-    if (fixed) this.save();
-    return fixed;
   },
   on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   emit() { listeners.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }); },

@@ -70,7 +70,7 @@ function paintPasteTab(container) {
     </div>
     <p style="margin-top:14px;color:var(--muted);font-family:var(--mono);font-size:11px;">
       Tip: copia un rango directamente desde tu hoja de Google Sheets y pega en cualquier celda con Ctrl+V.
-      Las columnas en gris (BALANCE, DD, etc.) son cálculos del Sheet — se aceptan en el paste pero se ignoran al importar.
+      Las columnas en gris marcadas como (calc) o (ignorado) son cálculos del Sheet o importes monetarios — se aceptan en el paste para preservar el alineamiento de columnas, pero se descartan al importar. La app trabaja solo en porcentaje.
     </p>
     <div id="importResult"></div>
   `;
@@ -228,7 +228,7 @@ function paintUrlTab(container) {
   container.innerHTML = `
     <div class="card">
       <div class="card-title">Importar desde Apps Script</div>
-      <div class="card-sub">URL pública del endpoint del Google Apps Script · los € se convierten a % usando el capital del sheet (50.000)</div>
+      <div class="card-sub">URL pública del endpoint del Google Apps Script · todos los importes se almacenan como porcentaje</div>
       <div class="form" style="max-width:none;">
         <div class="form-field">
           <label class="form-label">URL del endpoint</label>

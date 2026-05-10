@@ -53,7 +53,7 @@ Abre `http://localhost:8000`.
 ### B) Desde Apps Script (URL)
 1. Pega la URL pública de tu Apps Script (la misma que usaba el `v17.html`).
 2. Click en **Importar**.
-3. La app convierte automáticamente los importes en € a % usando tu capital base (ver Ajustes).
+3. La app trabaja siempre en porcentaje. La conversión interna desde el importe que devuelve el Apps Script es automática y no requiere configuración.
 
 ### C) Subir archivo
 - Acepta `.json` (formato Apps Script o export propio) y `.csv` (formato export propio).
@@ -63,11 +63,12 @@ Abre `http://localhost:8000`.
 ## Configuración
 
 En **Ajustes** puedes:
-- Cambiar el capital base (default `50.000 €`). Solo afecta nuevas importaciones desde Apps Script.
 - Guardar la URL del Apps Script para reimportar más tarde.
 - Cambiar entre modo oscuro y claro.
 - Exportar todos tus trades a JSON (backup).
-- Borrar todos los datos (con confirmación doble).
+- Borrar trades de una estrategia concreta o borrar todos los datos.
+
+> La gestión de cuentas y la conversión a importes monetarios reales se hará en una sección dedicada más adelante. Aquí toda la operativa va en porcentaje.
 
 ---
 
@@ -157,7 +158,7 @@ Resultado derivado: `pnl_pct > 0.2` → `TP`, `pnl_pct < -0.2` → `SL`, resto �
 Cada alumno tiene su propio `localStorage`, así que la app es self-contained. Para distribuir:
 
 1. Comparte la carpeta `tradinverso/` (zip, GitHub, hosting estático).
-2. Cada alumno ajusta su capital en Ajustes y empieza a registrar trades.
+2. Cada alumno empieza a registrar sus trades.
 3. Si tienen histórico en Google Sheets, lo pueden importar pegándolo o vía URL del Apps Script.
 
 ---
@@ -177,5 +178,5 @@ Cada alumno tiene su propio `localStorage`, así que la app es self-contained. P
 - **Nuevas vistas:** Nuevo trade, vistas dedicadas por estrategia, calendario interactivo, diagnóstico estructurado, importación masiva, ajustes.
 - **Persistencia local:** los trades se guardan en `localStorage`, no dependen de Google Sheets para visualizarse.
 - **Modo claro:** soporte completo.
-- **Capital configurable:** ya no está hardcoded a 50.000 €.
+- **Solo porcentaje:** toda la operativa se mide en %; la gestión de cuentas y conversión a importes monetarios se hará en su propia sección.
 - **Diagnóstico granular:** alertas técnicas y emocionales separadas en bloques con umbrales explícitos.

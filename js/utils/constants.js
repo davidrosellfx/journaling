@@ -1,7 +1,7 @@
-// El Google Sheet de origen calcula los € a partir del % usando un capital
-// base fijo de 50.000 €. Cuando importamos desde Apps Script (que devuelve €),
-// usamos esta misma constante para recuperar el % real.
+// Factor interno usado SOLO para convertir el importe monetario que devuelve
+// el Apps Script legacy a porcentaje. La app trabaja en % en todo momento;
+// este factor refleja el capital base con el que el Google Sheet original
+// calcula sus columnas de importe. No se expone al usuario.
 //
-// Si en el futuro el sheet del usuario cambia su capital base, solo hay que
-// actualizar este número.
+// Si en el futuro el sheet de origen cambia, basta con actualizar este número.
 export const SHEET_CONVERSION_FACTOR = 50000;

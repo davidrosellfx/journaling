@@ -1,7 +1,6 @@
 const KEYS = {
   trades: 'tradinverso_trades',
   theme: 'tradinverso_theme',
-  capital: 'tradinverso_capital',
   url: 'tradinverso_apps_script_url',
   version: 'tradinverso_schema_version',
 };
@@ -28,11 +27,6 @@ export const storage = {
   setTheme(t) {
     localStorage.setItem(KEYS.theme, t);
   },
-  // Capital legacy: ya no se usa en la app. Se mantiene como no-op por
-  // compatibilidad con código antiguo. La gestión de cuentas/$ se hará
-  // por trade asignado a una cuenta concreta más adelante.
-  getCapital() { return 50000; },
-  setCapital() { /* no-op */ },
   getAppsScriptUrl() {
     return localStorage.getItem(KEYS.url) || '';
   },

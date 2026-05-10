@@ -2,8 +2,10 @@ import { parseDate, parseTime, durationMinutes, hourToString } from './date-help
 import { normalizePair } from './pair-normalize.js';
 import { SHEET_CONVERSION_FACTOR } from './constants.js';
 
-// Maps a single Apps Script trade record (€ pnl) → canonical schema.
-// Conversion factor is hardcoded — see constants.js.
+// Maps a single Apps Script trade record → canonical schema.
+// The legacy Apps Script returns the P&L as a monetary amount; we convert
+// internally to the canonical percentage. The factor is hardcoded — see
+// constants.js. The user never sees money in the app.
 export function mapAppsScriptTrade(raw) {
   if (!raw || !raw.sheet) return null;
 
@@ -21,9 +23,10 @@ export function mapAppsScriptTrade(raw) {
     close_str = hourToString(closeMin / 60);
   }
 
-  // Convert € pnl to %
-  const pnlEur = typeof raw.pnl === 'number' ? raw.pnl : parseFloat(raw.pnl);
-  const pnl_pct = !isNaN(pnlEur) ? (pnlEur / SHEET_CONVERSION_FACTOR) * 100 : 0;
+  // Apps Script returns the P&L as a money amount; convert to % using the
+  // sheet's internal capital base (hidden from the user).
+  const rawAmount = typeof raw.pnl === 'number' ? raw.pnl : parseFloat(raw.pnl);
+  const pnl_pct = !isNaN(rawAmount) ? (rawAmount / SHEET_CONVERSION_FACTOR) * 100 : 0;
 
   return {
     sheet: String(raw.sheet).toUpperCase(),
