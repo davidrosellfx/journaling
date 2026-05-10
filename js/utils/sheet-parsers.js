@@ -13,14 +13,15 @@ import { normalizePair } from './pair-normalize.js';
 //   8:TIME  9:PIPS  10:ZONE  11:%P/L  12:€P&L  13:RES  14..20:calc
 //   21:Sensacion  22:WWW  23:Reflexión
 //
-// LIQUIDEZ columns (verified):
+// LIQUIDEZ columns (verified — note the actual data order has %P&L BEFORE $P/L,
+// even though the header label says the opposite):
 //   0:""  1:TRADE  2:PAR  3:SETUP  4:DATE  5:DIA  6:OPEN  7:CLOSE
-//   8:TIME  9:ZONA  10:RR  11:Pip SL  12:ENTRY  13:$P/L  14:%P&L
+//   8:TIME  9:ZONA  10:RR  11:Pip SL  12:ENTRY  13:%P&L  14:$P/L
 //   15:RES  16..22:calc  23:Sensacion  24:HTF  25:LTF  26:Reflexión
 //
-// NASDAQ columns (verified):
+// NASDAQ columns (verified — same %P&L-then-$P/L order):
 //   0:""  1:TRADE  2:SETUP  3:DATE  4:DIA  5:OPEN  6:CLOSE  7:TIME
-//   8:ZONA  9:RR  10:TICKS  11:ENTRY  12:$P/L  13:%P&L  14:RES
+//   8:ZONA  9:RR  10:TICKS  11:ENTRY  12:%P&L  13:$P/L  14:RES
 //   15..21:calc  22:Sensacion  23:HTF  24:LTF  25:Reflexión
 
 const SHEET_COL_MAP = {
@@ -30,12 +31,12 @@ const SHEET_COL_MAP = {
   },
   LIQUIDEZ: {
     trade: 1, pair: 2, setup: 3, date: 4, open: 6, close: 7,
-    zone: 9, rr: 10, pip: 11, entry: 12, pct: 14, res: 15,
+    zone: 9, rr: 10, pip: 11, entry: 12, pct: 13, res: 15,
     sens: 23, url1: 24, url2: 25, reflex: 26,
   },
   NASDAQ: {
     trade: 1, setup: 2, date: 3, open: 5, close: 6,
-    zone: 8, rr: 9, ticks: 10, entry: 11, pct: 13, res: 14,
+    zone: 8, rr: 9, ticks: 10, entry: 11, pct: 12, res: 14,
     sens: 22, url1: 23, url2: 24, reflex: 25,
   },
 };
@@ -152,8 +153,8 @@ export const IMPORT_HEADERS = {
     { key: 'rr',      label: 'RR',         calc: false },
     { key: 'pip',     label: 'PIP SL',     calc: false },
     { key: 'entry',   label: 'ENTRY',      calc: false },
-    { key: 'usd',     label: '$ P/L',      calc: true },
     { key: 'pct',     label: '% P&L',      calc: false },
+    { key: 'usd',     label: '$ P/L',      calc: true },
     { key: 'res',     label: 'RES',        calc: false },
     { key: 'balance', label: 'BALANCE',    calc: true },
     { key: 'pnlacc',  label: 'P&L ACC.',   calc: true },
@@ -180,8 +181,8 @@ export const IMPORT_HEADERS = {
     { key: 'rr',      label: 'RR',         calc: false },
     { key: 'ticks',   label: 'TICKS',      calc: false },
     { key: 'entry',   label: 'ENTRY',      calc: false },
-    { key: 'usd',     label: '$ P/L',      calc: true },
     { key: 'pct',     label: '% P&L',      calc: false },
+    { key: 'usd',     label: '$ P/L',      calc: true },
     { key: 'res',     label: 'RES',        calc: false },
     { key: 'balance', label: 'BALANCE',    calc: true },
     { key: 'pnlacc',  label: 'P&L ACC.',   calc: true },

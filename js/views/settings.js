@@ -9,6 +9,7 @@ export function settingsView(container) {
   const capital = storage.getCapital();
   const url = storage.getAppsScriptUrl();
   const tradeCount = state.trades.length;
+  const countSheet = sheet => state.trades.filter(t => t.sheet === sheet).length;
 
   container.innerHTML = `
     <div class="page-header">
@@ -64,6 +65,28 @@ export function settingsView(container) {
 
       <div class="setting-row">
         <div class="setting-info">
+          <div class="setting-label">Reparar valores anómalos</div>
+          <div class="setting-desc">Si tras importar ves trades con porcentajes desorbitados (ej. -500% por trade), este botón divide los <code>pnl_pct</code> &gt; 50 entre el capital para recuperar el % real. Útil tras corregir el bug de columnas LIQUIDEZ/NASDAQ.</div>
+        </div>
+        <div class="setting-control" style="display:flex;justify-content:flex-end;">
+          <button class="btn" id="repairBtn">Reparar</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Borrar trades por estrategia</div>
+          <div class="setting-desc">Elimina solo los trades de una estrategia concreta. Útil para reimportar tras corregir el bug.</div>
+        </div>
+        <div class="setting-control" style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn danger" data-wipe-sheet="ZONAS">Zonas (${countSheet('ZONAS')})</button>
+          <button class="btn danger" data-wipe-sheet="LIQUIDEZ">Liquidez (${countSheet('LIQUIDEZ')})</button>
+          <button class="btn danger" data-wipe-sheet="NASDAQ">Nasdaq (${countSheet('NASDAQ')})</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
           <div class="setting-label">Borrar todos los datos</div>
           <div class="setting-desc">Elimina todos los trades y la configuración. Esta acción no se puede deshacer.</div>
         </div>
@@ -111,6 +134,60 @@ export function settingsView(container) {
           router.go('#/dashboard');
         } },
       ],
+    });
+  });
+
+  container.querySelector('#repairBtn').addEventListener('click', () => {
+    const candidates = state.trades.filter(t => Math.abs(t.pnl_pct || 0) > 50).length;
+    if (!candidates) {
+      openModal({
+        title: 'Reparar valores anómalos',
+        body: 'No hay trades con <code>pnl_pct</code> > 50%. Tus datos parecen correctos.',
+        actions: [{ label: 'Cerrar', onClick: close => close() }],
+      });
+      return;
+    }
+    openModal({
+      title: 'Reparar valores anómalos',
+      body: `Se encontraron <strong>${candidates} trades</strong> con valores fuera de rango (probablemente € en vez de %).
+             Se dividirán entre el capital actual (<strong>${capital.toLocaleString('es-ES')} €</strong>) para recuperar el % real.
+             <br><br>Recomendado solo si acabas de actualizar la app y los datos quedaron mal importados. ¿Continuar?`,
+      actions: [
+        { label: 'Cancelar', onClick: close => close() },
+        { label: 'Reparar ahora', variant: 'primary', onClick: close => {
+          const fixed = state.repairAnomalousPct();
+          close();
+          openModal({
+            title: 'Reparados',
+            body: `<strong>${fixed} trades</strong> corregidos. Revisa el dashboard.`,
+            actions: [{ label: 'Ir al dashboard', variant: 'primary', onClick: c => { c(); router.go('#/dashboard'); } }],
+          });
+        } },
+      ],
+    });
+  });
+
+  container.querySelectorAll('[data-wipe-sheet]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sheet = btn.dataset.wipeSheet;
+      const n = countSheet(sheet);
+      if (!n) return;
+      openModal({
+        title: `Borrar trades de ${sheet}`,
+        body: `Vas a eliminar <strong>${n} trades</strong> de la estrategia ${sheet}. Las demás estrategias no se ven afectadas. ¿Continuar?`,
+        actions: [
+          { label: 'Cancelar', onClick: close => close() },
+          { label: `Sí, borrar ${n}`, variant: 'danger', onClick: close => {
+            const removed = state.removeBySheet(sheet);
+            close();
+            openModal({
+              title: 'Borrado',
+              body: `<strong>${removed}</strong> trades de ${sheet} eliminados.`,
+              actions: [{ label: 'Cerrar', onClick: c => { c(); settingsView(container); } }],
+            });
+          } },
+        ],
+      });
     });
   });
 }

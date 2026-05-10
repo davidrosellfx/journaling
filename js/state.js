@@ -102,6 +102,28 @@ export const state = {
     this.trades = trades.map(sanitizeTrade).filter(Boolean);
     this.save();
   },
+  removeBySheet(sheet) {
+    const before = this.trades.length;
+    this.trades = this.trades.filter(t => t.sheet !== sheet);
+    const removed = before - this.trades.length;
+    this.save();
+    return removed;
+  },
+  // Repair trades whose pnl_pct looks like an € amount instead of a percentage.
+  // Heuristic: |pnl_pct| > 50 → divide by capital × 100 to recover the real %.
+  repairAnomalousPct() {
+    let fixed = 0;
+    for (const t of this.trades) {
+      if (Math.abs(t.pnl_pct || 0) > 50) {
+        const corrected = (t.pnl_pct / this.capital) * 100;
+        t.pnl_pct = +corrected.toFixed(4);
+        t.result = t.pnl_pct > 0.2 ? 'TP' : t.pnl_pct < -0.2 ? 'SL' : 'BE';
+        fixed++;
+      }
+    }
+    if (fixed) this.save();
+    return fixed;
+  },
   on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   emit() { listeners.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }); },
 };

@@ -14,36 +14,72 @@ body { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 1
 #view { padding: 28px 32px; max-width: 1280px; width: 100%; margin: 0 auto; }
 
 /* ── Sidebar ─────────────────────────────────────────────── */
-.brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 24px; }
+.brand { display: flex; align-items: center; gap: 12px; padding: 4px 8px 28px; text-decoration: none; color: var(--text); }
 .brand-logo {
-  width: 36px; height: 36px; border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 11px;
   background: linear-gradient(135deg, var(--green), var(--accent));
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; color: #0A0F1E; font-size: 16px;
+  font-weight: 800; color: #0A0F1E; font-size: 18px;
+  box-shadow: 0 4px 14px rgba(0,212,170,0.25);
 }
-.brand-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
-.brand-name span { color: var(--green); }
-.nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-.nav-section { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; padding: 16px 12px 8px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-line1 { font-size: 10px; font-weight: 500; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-family: var(--mono); }
+.brand-line2 { font-size: 16px; font-weight: 700; letter-spacing: -0.4px; color: var(--text); }
+.brand-line2 span { color: var(--green); }
+
+.nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.nav-section { font-family: var(--mono); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: .14em; padding: 18px 12px 6px; font-weight: 600; }
+
 .nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: 10px;
   color: var(--muted); cursor: pointer; text-decoration: none;
-  font-size: 13px; transition: background .12s, color .12s;
+  font-size: 13.5px; font-weight: 500;
+  transition: background .12s, color .12s, transform .08s;
+  position: relative;
 }
 .nav-item:hover { background: var(--hover); color: var(--text); }
-.nav-item.active { background: var(--card); color: var(--text); font-weight: 500; }
-.nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-.nav-item.active .dot { background: var(--green); }
-.nav-item.zonas .dot { background: var(--zonas); }
-.nav-item.liquidez .dot { background: var(--liquidez); }
-.nav-item.nasdaq .dot { background: var(--nasdaq); }
-.theme-toggle {
-  margin-top: auto; padding: 10px 12px; background: var(--card); border-radius: 8px;
-  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
-  border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 11px;
+.nav-item:active { transform: scale(0.98); }
+.nav-item.active {
+  background: var(--card);
+  color: var(--text-strong);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 4px rgba(0,0,0,0.15);
 }
-.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: -16px; top: 8px; bottom: 8px;
+  width: 3px; background: var(--green); border-radius: 0 3px 3px 0;
+}
+.nav-item.zonas.active::before { background: var(--zonas); }
+.nav-item.liquidez.active::before { background: var(--liquidez); }
+.nav-item.nasdaq.active::before { background: var(--nasdaq); }
+
+.nav-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--card2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+  transition: background .12s, border-color .12s;
+}
+.nav-item:hover .nav-icon { border-color: var(--border-strong); }
+.nav-item.active .nav-icon { background: var(--surface); border-color: var(--border-strong); }
+.nav-item.zonas .nav-icon { color: var(--zonas); }
+.nav-item.liquidez .nav-icon { color: var(--liquidez); }
+.nav-item.nasdaq .nav-icon { color: var(--nasdaq); }
+.nav-item.zonas.active .nav-icon { background: var(--zonas-bg); border-color: var(--zonas); }
+.nav-item.liquidez.active .nav-icon { background: var(--liquidez-bg); border-color: var(--liquidez); }
+.nav-item.nasdaq.active .nav-icon { background: var(--nasdaq-bg); border-color: var(--nasdaq); }
+
+.nav-label { flex: 1; }
+.nav-meta { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+.theme-toggle {
+  margin-top: 14px; padding: 12px 14px; background: var(--card); border-radius: 10px;
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px;
+  gap: 10px;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface); }
+.theme-toggle-icon { font-size: 16px; }
 
 /* ── Headings + section dividers ─────────────────────────── */
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
@@ -176,11 +212,13 @@ body { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 1
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1100px) {
-  body { grid-template-columns: 60px 1fr; }
-  :root { --sidebar-w: 60px; }
-  .brand-name, .nav-item span:not(.dot), .nav-section, .theme-toggle span { display: none; }
-  .nav-item { justify-content: center; }
-  .theme-toggle { justify-content: center; }
+  body { grid-template-columns: 68px 1fr; }
+  :root { --sidebar-w: 68px; }
+  .brand-text, .nav-label, .nav-meta, .nav-section, .theme-toggle span { display: none; }
+  .nav-item { justify-content: center; padding: 11px 0; }
+  .nav-item.active::before { left: -8px; }
+  .theme-toggle { justify-content: center; padding: 10px 0; }
+  .brand { justify-content: center; padding: 4px 0 24px; }
 }
 @media (max-width: 800px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
