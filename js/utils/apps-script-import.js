@@ -1,8 +1,10 @@
 import { parseDate, parseTime, durationMinutes, hourToString } from './date-helpers.js';
 import { normalizePair } from './pair-normalize.js';
+import { SHEET_CONVERSION_FACTOR } from './constants.js';
 
-// Maps a single Apps Script trade record (€ pnl) → canonical schema
-export function mapAppsScriptTrade(raw, capital) {
+// Maps a single Apps Script trade record (€ pnl) → canonical schema.
+// Conversion factor is hardcoded — see constants.js.
+export function mapAppsScriptTrade(raw) {
   if (!raw || !raw.sheet) return null;
 
   const date = parseDate(raw.date);
@@ -21,7 +23,7 @@ export function mapAppsScriptTrade(raw, capital) {
 
   // Convert € pnl to %
   const pnlEur = typeof raw.pnl === 'number' ? raw.pnl : parseFloat(raw.pnl);
-  const pnl_pct = !isNaN(pnlEur) && capital ? (pnlEur / capital) * 100 : 0;
+  const pnl_pct = !isNaN(pnlEur) ? (pnlEur / SHEET_CONVERSION_FACTOR) * 100 : 0;
 
   return {
     sheet: String(raw.sheet).toUpperCase(),
@@ -45,10 +47,10 @@ export function mapAppsScriptTrade(raw, capital) {
 }
 
 // Fetches an Apps Script endpoint and returns canonical trades
-export async function fetchAppsScript(url, capital) {
+export async function fetchAppsScript(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
   const raw = Array.isArray(json) ? json : (json.trades || []);
-  return raw.map(t => mapAppsScriptTrade(t, capital)).filter(Boolean);
+  return raw.map(t => mapAppsScriptTrade(t)).filter(Boolean);
 }

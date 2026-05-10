@@ -28,13 +28,11 @@ export const storage = {
   setTheme(t) {
     localStorage.setItem(KEYS.theme, t);
   },
-  getCapital() {
-    const v = parseFloat(localStorage.getItem(KEYS.capital));
-    return isNaN(v) ? 50000 : v;
-  },
-  setCapital(v) {
-    localStorage.setItem(KEYS.capital, String(v));
-  },
+  // Capital legacy: ya no se usa en la app. Se mantiene como no-op por
+  // compatibilidad con código antiguo. La gestión de cuentas/$ se hará
+  // por trade asignado a una cuenta concreta más adelante.
+  getCapital() { return 50000; },
+  setCapital() { /* no-op */ },
   getAppsScriptUrl() {
     return localStorage.getItem(KEYS.url) || '';
   },
@@ -53,7 +51,6 @@ export const storage = {
   exportJson() {
     return {
       version: SCHEMA_VERSION,
-      capital: this.getCapital(),
       trades: this.getTrades(),
       exportedAt: new Date().toISOString(),
     };

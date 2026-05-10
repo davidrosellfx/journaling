@@ -1,6 +1,7 @@
 import { storage } from './storage.js';
 import { uuid } from './utils/uuid.js';
 import { parseTime, durationMinutes } from './utils/date-helpers.js';
+import { SHEET_CONVERSION_FACTOR } from './utils/constants.js';
 
 const SENS_VALID = new Set([
   'Seguro - Confiado',
@@ -51,18 +52,11 @@ const listeners = new Set();
 
 export const state = {
   trades: [],
-  capital: 50000,
   load() {
-    this.capital = storage.getCapital();
     this.trades = storage.getTrades().map(sanitizeTrade).filter(Boolean);
   },
   save() {
     storage.setTrades(this.trades);
-    this.emit();
-  },
-  setCapital(v) {
-    this.capital = v;
-    storage.setCapital(v);
     this.emit();
   },
   add(trade) {
@@ -109,13 +103,26 @@ export const state = {
     this.save();
     return removed;
   },
-  // Repair trades whose pnl_pct looks like an € amount instead of a percentage.
-  // Heuristic: |pnl_pct| > 50 → divide by capital × 100 to recover the real %.
-  repairAnomalousPct() {
+  // Repair trades where pnl_pct is suspect.
+  // Case A — paste-from-Excel column bug: pnl_pct stored as € amount (|pct| > 50).
+  //   Fix: divide by SHEET_CONVERSION_FACTOR/100 = 500.
+  // Case B — apps-script imported with wrong capital: pnl_pct stored at scale of
+  //   (€/oldCapital × 100). Real % = stored × oldCapital / SHEET_CONVERSION_FACTOR.
+  //   Caller passes oldCapital; only trades with affected sheets are touched.
+  repairAnomalousPct({ oldCapital = null, sheets = null } = {}) {
     let fixed = 0;
     for (const t of this.trades) {
-      if (Math.abs(t.pnl_pct || 0) > 50) {
-        const corrected = (t.pnl_pct / this.capital) * 100;
+      if (sheets && !sheets.includes(t.sheet)) continue;
+      const pct = t.pnl_pct || 0;
+      let corrected = null;
+      if (Math.abs(pct) > 50) {
+        // Case A
+        corrected = (pct / SHEET_CONVERSION_FACTOR) * 100;
+      } else if (oldCapital && oldCapital > 0 && oldCapital !== SHEET_CONVERSION_FACTOR) {
+        // Case B — only when user explicitly provided the old capital
+        corrected = pct * (oldCapital / SHEET_CONVERSION_FACTOR);
+      }
+      if (corrected != null) {
         t.pnl_pct = +corrected.toFixed(4);
         t.result = t.pnl_pct > 0.2 ? 'TP' : t.pnl_pct < -0.2 ? 'SL' : 'BE';
         fixed++;

@@ -2,10 +2,8 @@ import { state } from '../state.js';
 import { storage } from '../storage.js';
 import { IMPORT_HEADERS, rowToTrade } from '../utils/sheet-parsers.js';
 import { parsePastedText } from '../utils/paste-parser.js';
-import { fetchAppsScript } from '../utils/apps-script-import.js';
+import { fetchAppsScript, mapAppsScriptTrade } from '../utils/apps-script-import.js';
 import { parseCsv, toCsv, downloadFile } from '../utils/csv.js';
-import { mapAppsScriptTrade } from '../utils/apps-script-import.js';
-import { router } from '../router.js';
 
 let activeTab = 'paste';
 let pasteSheet = 'ZONAS';
@@ -227,11 +225,10 @@ function doImport(container) {
 // ── URL TAB ──────────────────────────────────────────────────
 function paintUrlTab(container) {
   const url = storage.getAppsScriptUrl();
-  const capital = storage.getCapital();
   container.innerHTML = `
     <div class="card">
       <div class="card-title">Importar desde Apps Script</div>
-      <div class="card-sub">URL pública del endpoint de tu Google Apps Script · capital actual ${capital.toLocaleString('es-ES')} €</div>
+      <div class="card-sub">URL pública del endpoint del Google Apps Script · los € se convierten a % usando el capital del sheet (50.000)</div>
       <div class="form" style="max-width:none;">
         <div class="form-field">
           <label class="form-label">URL del endpoint</label>
@@ -252,7 +249,7 @@ function paintUrlTab(container) {
     result.className = '';
     result.innerHTML = '<div class="loader"><div class="spinner"></div><div>Cargando trades…</div></div>';
     try {
-      const trades = await fetchAppsScript(u, capital);
+      const trades = await fetchAppsScript(u);
       if (!trades.length) {
         result.className = 'import-result err';
         result.innerHTML = 'El endpoint no devolvió trades.';
@@ -286,7 +283,6 @@ function paintFileTab(container) {
     const result = container.querySelector('#fileResult');
     try {
       const text = await f.text();
-      const capital = storage.getCapital();
       let trades = [];
       if (f.name.endsWith('.json')) {
         const parsed = JSON.parse(text);
@@ -295,7 +291,7 @@ function paintFileTab(container) {
         if (arr.length && arr[0].pnl_pct != null) {
           trades = arr;
         } else {
-          trades = arr.map(t => mapAppsScriptTrade(t, capital)).filter(Boolean);
+          trades = arr.map(t => mapAppsScriptTrade(t)).filter(Boolean);
         }
       } else {
         // CSV: assume first row is headers matching IMPORT_HEADERS for one strategy.
